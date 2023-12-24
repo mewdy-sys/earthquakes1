@@ -21,3 +21,5 @@
 Результат работы DeeepestEearthquake.java: Штат с самым глубоким землетрясением в 2013: WEST VIRGINIA
 
 ![image](https://github.com/mewdy-sys/earthquakes1/assets/58120540/f0ada2bf-5669-497e-a811-a214f0b25182)
+
+Файл TestSQLite.java использовался для проверки содержимого базы данных
