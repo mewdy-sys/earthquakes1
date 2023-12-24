@@ -1,3 +1,5 @@
+package org.example;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -6,10 +8,7 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 
 public class EarthquakeGraph {
 
@@ -17,14 +16,15 @@ public class EarthquakeGraph {
         SwingUtilities.invokeLater(() -> {
             DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
-            try {
-                String url = "jdbc:sqlite:test.db";
-                Connection connection = DriverManager.getConnection(url);
+            String url = "jdbc:sqlite:test.db";
+            try (Connection connection = DriverManager.getConnection(url)) {
                 if (connection != null) {
                     System.out.println("Connected to the database");
 
-                    String query = "SELECT strftime('%Y', \"Время\") AS year, COUNT(*) AS count " +
-                            "FROM data GROUP BY year";
+                    String query = "SELECT strftime('%Y', e.\"Time\") AS year, COUNT(*) AS count " +
+                            "FROM Earthquakes e " +
+                            "INNER JOIN States s ON e.StateID = s.StateID " +
+                            "GROUP BY year";
                     PreparedStatement preparedStatement = connection.prepareStatement(query);
                     ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -38,7 +38,6 @@ public class EarthquakeGraph {
                     while (resultSet.next()) {
                         String year = resultSet.getString("year");
                         int count = resultSet.getInt("count");
-                        //System.out.println("Year: " + year + ", Count: " + count);
 
                         if (year != null && !year.isEmpty()) {
                             try {
@@ -49,8 +48,6 @@ public class EarthquakeGraph {
                             }
                         }
                     }
-
-
 
                     JFreeChart lineChart = ChartFactory.createLineChart(
                             "Average Earthquakes per Year",

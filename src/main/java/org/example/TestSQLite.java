@@ -1,37 +1,58 @@
-import java.sql.*;
+package org.example;// Проверка содержимого базы данных
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 
 public class TestSQLite {
 
     public static void main(String[] args) {
+        String url = "jdbc:sqlite:test.db";
+
         try {
-            // Установка соединения с базой данных SQLite
-            String url = "jdbc:sqlite:test.db";
             Connection connection = DriverManager.getConnection(url);
             if (connection != null) {
                 System.out.println("Connected to the database");
 
-                // Выполнение запроса для выборки данных из таблицы
-                Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT * FROM data");
+                DatabaseMetaData metaData = connection.getMetaData();
+                ResultSet resultSet = metaData.getTables(null, null, null, new String[]{"TABLE"});
 
-                // Вывод результатов запроса
                 while (resultSet.next()) {
-                    System.out.println("ID: " + resultSet.getString("ID") +
-                            ", Глубина в метрах: " + resultSet.getInt("Глубина в метрах") +
-                            ", Тип магнитуды: " + resultSet.getString("Тип магнитуды") +
-                            ", Магнитуда: " + resultSet.getFloat("Магнитуда") +
-                            ", Штат: " + resultSet.getString("Штат") +
-                            ", Время: " + resultSet.getString("Время"));
+                    String tableName = resultSet.getString("TABLE_NAME");
+                    System.out.println("Table: " + tableName);
+
+                    Statement statement = connection.createStatement();
+                    ResultSet tableResultSet = statement.executeQuery("SELECT * FROM " + tableName);
+                    ResultSetMetaData tableMetaData = tableResultSet.getMetaData();
+                    int columnCount = tableMetaData.getColumnCount();
+
+                    for (int i = 1; i <= columnCount; i++) {
+                        System.out.print(tableMetaData.getColumnName(i) + "\t");
+                    }
+                    System.out.println();
+
+                    int rowCount = 0;
+                    while (tableResultSet.next()) {
+                        rowCount++;
+                        for (int i = 1; i <= columnCount; i++) {
+                            System.out.print(tableResultSet.getString(i) + "\t");
+                        }
+                        System.out.println();
+                    }
+
+                    System.out.println("Number of rows: " + rowCount + "\n");
+
+                    tableResultSet.close();
                 }
 
-                // Закрытие ресурсов
                 resultSet.close();
-                statement.close();
                 connection.close();
             } else {
                 System.out.println("Failed to connect to the database");
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

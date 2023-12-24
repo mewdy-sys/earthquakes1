@@ -14,7 +14,10 @@ public class AverageMagnitude {
             if (connection != null) {
                 System.out.println("Connected to the database");
 
-                String query = "SELECT AVG(Магнитуда) AS average_magnitude FROM data WHERE Штат = 'West Virginia'";
+                String query = "SELECT AVG(Magnitude) AS average_magnitude " +
+                        "FROM Earthquakes e " +
+                        "INNER JOIN States s ON e.StateID = s.StateID " +
+                        "WHERE s.StateName = 'West Virginia'";
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
                 ResultSet resultSet = preparedStatement.executeQuery();
 

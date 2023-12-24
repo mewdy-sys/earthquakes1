@@ -14,13 +14,17 @@ public class DeepestEarthquake {
             if (connection != null) {
                 System.out.println("Connected to the database");
 
-                String query = "SELECT Штат FROM data WHERE strftime('%Y', \"Время\") = '2013' " +
-                        "ORDER BY CAST(REPLACE(\"Глубина в метрах\", ',', '.') AS DECIMAL) DESC LIMIT 1";
+                String query = "SELECT s.StateName " +
+                        "FROM Earthquakes e " +
+                        "INNER JOIN States s ON e.StateID = s.StateID " +
+                        "WHERE strftime('%Y', e.Time) = '2013' " +
+                        "ORDER BY CAST(REPLACE(e.DepthInMeters, ',', '.') AS DECIMAL) DESC LIMIT 1";
+
                 PreparedStatement preparedStatement = connection.prepareStatement(query);
                 ResultSet resultSet = preparedStatement.executeQuery();
 
                 if (resultSet.next()) {
-                    String state = resultSet.getString("Штат");
+                    String state = resultSet.getString("StateName");
                     System.out.println("Штат с самым глубоким землетрясением в 2013: " + state);
                 } else {
                     System.out.println("Не найдены данные за 2013");
